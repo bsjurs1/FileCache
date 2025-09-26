@@ -11,7 +11,7 @@ Disk-backed caching for async/await-powered network fetches on Apple platforms. 
 
 ## Requirements
 - Swift 5.5 or newer
-- iOS 12, macOS 11, tvOS 12, or watchOS 4 minimum deployment targets
+- iOS 15, macOS 12, tvOS 15, or watchOS 8 minimum deployment targets
 
 ## Installation
 Add `URLCache` to your project using Swift Package Manager.
