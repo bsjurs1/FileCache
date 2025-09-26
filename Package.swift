@@ -4,15 +4,15 @@
 import PackageDescription
 
 let package = Package(
-    name: "URLCache",
+    name: "FileCache",
     platforms: [
         .iOS(.v15), .macOS(.v12), .tvOS(.v15), .watchOS(.v8)
     ],
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
-            name: "URLCache",
-            targets: ["URLCache"]
+            name: "FileCache",
+            targets: ["FileCache"]
         ),
     ],
     dependencies: [
@@ -22,16 +22,16 @@ let package = Package(
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
         .target(
-            name: "URLCache",
-            path: "Sources/URLCache"
+            name: "FileCache",
+            path: "Sources/FileCache"
         ),
         .testTarget(
-            name: "URLCacheTests",
+            name: "FileCacheTests",
             dependencies: [
-                "URLCache",
+                "FileCache",
                 .product(name: "Testing", package: "swift-testing")
             ],
-            path: "Tests/URLCacheTests"
+            path: "Tests/FileCacheTests"
         ),
     ]
 )

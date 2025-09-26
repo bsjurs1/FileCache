@@ -1,31 +1,31 @@
 //
-//  URLCache.swift
+//  FileCache.swift
 //
 //  Created by Bjarte Sjursen on 25/09/2025.
 //
 
 import Foundation
 
-/// A simple cache utility that will fetch files over the network and store them on disk based on the provided `URLCachePolicy`.
-/// When files are requested the `URLCache` will always check if the url has been requested before, and return the stored object.
-public class URLCache {
-    private let policy: URLCachePolicy
+/// A simple cache utility that will fetch files over the network and store them on disk based on the provided `FileCachePolicy`.
+/// When files are requested the `FileCache` will always check if the url has been requested before, and return the stored object.
+public class FileCache {
+    private let policy: FileCachePolicy
     private let fileManager: FileManager
     private let cacheDirectoryURL: URL
     private let indexURL: URL
-    private var index: [URL: URLCacheObject] = [:] {
+    private var index: [URL: FileCacheObject] = [:] {
         didSet {
             guard index != oldValue else { return }
             saveIndex()
         }
     }
     
-    /// Creates a new instance of `URLCache`
+    /// Creates a new instance of `FileCache`
     /// - Parameters:
     ///   - policy: tells the cache how long to retain data
     ///   - fileManager: provide the desired filemanager to use for the cache
     public init(
-        policy: URLCachePolicy,
+        policy: FileCachePolicy,
         fileManager: FileManager = .default
     ) throws {
         self.policy = policy
@@ -35,10 +35,10 @@ public class URLCache {
             for: .documentDirectory,
             in: .userDomainMask
         ).first else {
-            throw URLCacheError.unableToCreateDocumentsURL
+            throw FileCacheError.unableToCreateDocumentsURL
         }
 
-        let cacheDirectoryURL = documentsURL.appendingPathComponent("URLCache")
+        let cacheDirectoryURL = documentsURL.appendingPathComponent("FileCache")
         self.cacheDirectoryURL = cacheDirectoryURL
         self.indexURL = cacheDirectoryURL.appendingPathComponent("index.json")
 
@@ -55,7 +55,7 @@ public class URLCache {
         )
     }
     
-    private func loadIndex() -> [URL: URLCacheObject] {
+    private func loadIndex() -> [URL: FileCacheObject] {
         guard fileManager.fileExists(atPath: indexURL.path) else {
             return [:]
         }
@@ -63,7 +63,7 @@ public class URLCache {
         do {
             let data = try Data(contentsOf: indexURL)
             return try JSONDecoder().decode(
-                [URL: URLCacheObject].self,
+                [URL: FileCacheObject].self,
                 from: data
             )
         } catch {
@@ -77,7 +77,7 @@ public class URLCache {
     }
 
     private func isExpired(
-        _ cacheObject: URLCacheObject,
+        _ cacheObject: FileCacheObject,
         comparedTo date: Date = Date()
     ) -> Bool {
         guard let expirationDate = policy.expiration.expirationDate(
@@ -110,7 +110,7 @@ public class URLCache {
         let fileURL = cacheDirectoryURL.appendingPathComponent(filename)
         try data.write(to: fileURL, options: [.atomic])
         let now = Date()
-        index[url] = URLCacheObject(createdAt: now, diskURL: fileURL)
+        index[url] = FileCacheObject(createdAt: now, diskURL: fileURL)
     }
 
     private func pruneExpiredEntries(currentDate: Date = Date()) {
@@ -132,7 +132,7 @@ public class URLCache {
     }
 
     /// Fetch a file using the provided url.
-    /// When files are requested the `URLCache` will always check if the url has been requested before, and return the stored object if it exists on disk.
+    /// When files are requested the `FileCache` will always check if the url has been requested before, and return the stored object if it exists on disk.
     /// - Parameters:
     ///   - url: the universal resource locator pointing to a binary blob to fetch
     public func fetch(_ url: URL) async throws -> Data {

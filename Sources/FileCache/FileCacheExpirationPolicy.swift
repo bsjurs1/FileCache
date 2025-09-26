@@ -1,13 +1,13 @@
 //
-//  URLCacheExpirationPolicy.swift
+//  FileCacheExpirationPolicy.swift
 //
 //  Created by Bjarte Sjursen on 25/09/2025.
 //
 
 import Foundation
 
-/// Expiration policy for `URLCache` objects, deciding how long it will take before elements are pruned from the cache.
-public enum URLCacheExpirationPolicy {
+/// Expiration policy for `FileCache` objects, deciding how long it will take before elements are pruned from the cache.
+public enum FileCacheExpirationPolicy {
     /// Elements will never expire from the cache
     case never
     /// Elements will expire from the cache after the provided number of `seconds`
@@ -16,7 +16,7 @@ public enum URLCacheExpirationPolicy {
     case dateComponents(DateComponents)
 }
 
-extension URLCacheExpirationPolicy {
+extension FileCacheExpirationPolicy {
     /// Calculates the expiration date based on the policy and a starting point.
     /// - Parameters:
     ///   - startDate: Date when the cached item was created.

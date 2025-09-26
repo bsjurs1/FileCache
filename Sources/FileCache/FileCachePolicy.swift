@@ -6,11 +6,11 @@
 
 import Foundation
 
-public struct URLCachePolicy {
+public struct FileCachePolicy {
     public let maxItems: Int
-    public let expiration: URLCacheExpirationPolicy
+    public let expiration: FileCacheExpirationPolicy
 
-    public init(maxItems: Int, expiration: URLCacheExpirationPolicy) {
+    public init(maxItems: Int, expiration: FileCacheExpirationPolicy) {
         self.maxItems = maxItems
         self.expiration = expiration
     }

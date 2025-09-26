@@ -1,17 +1,17 @@
 import Testing
 import Foundation
-@testable import URLCache
+@testable import FileCache
 
-@Suite("URLCache")
-struct URLCacheTests {
+@Suite("FileCache")
+struct FileCacheTests {
     @Test func initializationFailsWhenDocumentsDirectoryIsMissing() {
-        let policy = URLCachePolicy(maxItems: 1, expiration: .never)
+        let policy = FileCachePolicy(maxItems: 1, expiration: .never)
         let fileManager = MissingDocumentsFileManager()
 
         do {
-            _ = try URLCache(policy: policy, fileManager: fileManager)
+            _ = try FileCache(policy: policy, fileManager: fileManager)
             Issue.record("Expected initialization to throw an error")
-        } catch let error as URLCacheError {
+        } catch let error as FileCacheError {
             #expect(error == .unableToCreateDocumentsURL)
         } catch {
             Issue.record("Unexpected error: \(error)")
@@ -24,7 +24,7 @@ struct URLCacheTests {
 
         prepareMockURLProtocol()
 
-        let cache = try URLCache(policy: .init(maxItems: 10, expiration: .never), fileManager: fileManager)
+        let cache = try FileCache(policy: .init(maxItems: 10, expiration: .never), fileManager: fileManager)
         let url = URL(string: "https://example.com/resource")!
         let payload = Data("payload".utf8)
         MockURLProtocol.enqueueResponse(for: url, data: payload)
@@ -32,7 +32,7 @@ struct URLCacheTests {
         let data = try await cache.fetch(url)
         #expect(data == payload)
 
-        let cacheDirectory = fileManager.documentsURL.appendingPathComponent("URLCache")
+        let cacheDirectory = fileManager.documentsURL.appendingPathComponent("FileCache")
         let indexURL = cacheDirectory.appendingPathComponent("index.json")
         #expect(FileManager.default.fileExists(atPath: indexURL.path))
 
@@ -47,7 +47,7 @@ struct URLCacheTests {
 
         prepareMockURLProtocol()
 
-        let cache = try URLCache(policy: .init(maxItems: 10, expiration: .never), fileManager: fileManager)
+        let cache = try FileCache(policy: .init(maxItems: 10, expiration: .never), fileManager: fileManager)
         let url = URL(string: "https://example.com/static")!
         let payload = Data("static".utf8)
         MockURLProtocol.enqueueResponse(for: url, data: payload)
@@ -66,7 +66,7 @@ struct URLCacheTests {
 
         prepareMockURLProtocol()
 
-        let cache = try URLCache(policy: .init(maxItems: 10, expiration: .timeInterval(0)), fileManager: fileManager)
+        let cache = try FileCache(policy: .init(maxItems: 10, expiration: .timeInterval(0)), fileManager: fileManager)
         let url = URL(string: "https://example.com/ephemeral")!
         let firstPayload = Data("first".utf8)
         let secondPayload = Data("second".utf8)
@@ -87,14 +87,14 @@ struct URLCacheTests {
 
         prepareMockURLProtocol()
 
-        let cache = try URLCache(policy: .init(maxItems: 10, expiration: .never), fileManager: fileManager)
+        let cache = try FileCache(policy: .init(maxItems: 10, expiration: .never), fileManager: fileManager)
         let url = URL(string: "https://example.com/removable")!
         let payload = Data("removable".utf8)
         MockURLProtocol.enqueueResponse(for: url, data: payload)
 
         _ = try await cache.fetch(url)
 
-        let cacheDirectory = fileManager.documentsURL.appendingPathComponent("URLCache")
+        let cacheDirectory = fileManager.documentsURL.appendingPathComponent("FileCache")
         let indexURL = cacheDirectory.appendingPathComponent("index.json")
         var decodedIndex = try loadIndex(at: indexURL)
         #expect(decodedIndex[url] != nil)
@@ -120,7 +120,7 @@ struct URLCacheTests {
 
         prepareMockURLProtocol()
 
-        let cache = try URLCache(policy: .init(maxItems: 10, expiration: .never), fileManager: fileManager)
+        let cache = try FileCache(policy: .init(maxItems: 10, expiration: .never), fileManager: fileManager)
         let firstURL = URL(string: "https://example.com/first")!
         let secondURL = URL(string: "https://example.com/second")!
         MockURLProtocol.enqueueResponse(for: firstURL, data: Data("first".utf8))
@@ -131,7 +131,7 @@ struct URLCacheTests {
 
         try await cache.removeAll()
 
-        let cacheDirectory = fileManager.documentsURL.appendingPathComponent("URLCache")
+        let cacheDirectory = fileManager.documentsURL.appendingPathComponent("FileCache")
         let contents = try FileManager.default.contentsOfDirectory(at: cacheDirectory, includingPropertiesForKeys: nil)
         #expect(contents.count == 1)
         let indexURL = cacheDirectory.appendingPathComponent("index.json")
@@ -151,21 +151,21 @@ struct URLCacheTests {
         MockURLProtocol.enqueueResponse(for: url, data: payload)
 
         do {
-            let cache = try URLCache(policy: .init(maxItems: 10, expiration: .never), fileManager: fileManager)
+            let cache = try FileCache(policy: .init(maxItems: 10, expiration: .never), fileManager: fileManager)
             let first = try await cache.fetch(url)
             #expect(first == payload)
         }
 
-        let secondCache = try URLCache(policy: .init(maxItems: 10, expiration: .never), fileManager: fileManager)
+        let secondCache = try FileCache(policy: .init(maxItems: 10, expiration: .never), fileManager: fileManager)
         let second = try await secondCache.fetch(url)
         #expect(second == payload)
         #expect(MockURLProtocol.requestCount(for: url) == 1)
     }
 }
 
-private func loadIndex(at url: URL) throws -> [URL: URLCacheObject] {
+private func loadIndex(at url: URL) throws -> [URL: FileCacheObject] {
     let data = try Data(contentsOf: url)
-    return try JSONDecoder().decode([URL: URLCacheObject].self, from: data)
+    return try JSONDecoder().decode([URL: FileCacheObject].self, from: data)
 }
 
 private let mockURLProtocolRegistration: Void = {
@@ -195,7 +195,7 @@ private final class TemporaryFileManager: FileManager {
         let baseURL = FileManager
             .default
             .temporaryDirectory
-            .appendingPathComponent("URLCacheTests-\(UUID().uuidString)")
+            .appendingPathComponent("FileCacheTests-\(UUID().uuidString)")
         self.rootURL = baseURL
         self.documentsURL = baseURL
         super.init()
