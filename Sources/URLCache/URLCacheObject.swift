@@ -9,4 +9,9 @@ import Foundation
 public struct URLCacheObject: Codable, Equatable {
     let createdAt: Date
     let diskURL: URL
+
+    public init(createdAt: Date, diskURL: URL) {
+        self.createdAt = createdAt
+        self.diskURL = diskURL
+    }
 }

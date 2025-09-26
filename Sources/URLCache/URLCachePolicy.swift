@@ -9,4 +9,9 @@ import Foundation
 public struct URLCachePolicy {
     public let maxItems: Int
     public let expiration: URLCacheExpirationPolicy
+
+    public init(maxItems: Int, expiration: URLCacheExpirationPolicy) {
+        self.maxItems = maxItems
+        self.expiration = expiration
+    }
 }
