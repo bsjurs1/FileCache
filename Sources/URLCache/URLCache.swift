@@ -145,10 +145,27 @@ public class URLCache {
                 removeCacheEntry(for: url)
             }
         }
-
+        
         let (data, _) = try await URLSession.shared.data(from: url)
+        removeOldestCacheEntryIfNeeded()
         try store(data, for: url)
         return data
+    }
+
+    private func removeOldestCacheEntryIfNeeded() {
+        if policy.maxItems < index.count {
+            removeOldestCacheEntry()
+        }
+    }
+    
+    private func removeOldestCacheEntry() {
+        guard !index.isEmpty else { return }
+        let oldestEntry = index.min { lhs, rhs in
+            lhs.value.createdAt < rhs.value.createdAt
+        }
+        guard let (url, cacheObject) = oldestEntry else { return }
+        deleteCacheFile(at: cacheObject.diskURL)
+        index.removeValue(forKey: url)
     }
     
     /// Remove all entries from the cache
