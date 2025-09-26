@@ -1,4 +1,4 @@
-// swift-tools-version: 6.2
+// swift-tools-version: 5.5
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "URLCache",
     platforms: [
-        .iOS(.v12), .macOS(.v11), .tvOS(.v12), .watchOS(.v4)
+        .iOS(.v15), .macOS(.v12), .tvOS(.v15), .watchOS(.v8)
     ],
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.

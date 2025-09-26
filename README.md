@@ -10,7 +10,7 @@ Disk-backed caching for async/await-powered network fetches on Apple platforms. 
 - Safe defaults with the option to inject a custom `FileManager` for testing or advanced scenarios
 
 ## Requirements
-- Swift 6.2 or newer (per `ToolsVersion` in `Package.swift`)
+- Swift 5.5 or newer
 - iOS 12, macOS 11, tvOS 12, or watchOS 4 minimum deployment targets
 
 ## Installation
