@@ -4,7 +4,7 @@ URLCache is a simple and modern Swift based tool to make it easy to fetch and ca
 
 A simple example of how to use it looks like this:
 
-```
+```swift
 import URLCache
 
 let cache = try URLCache(policy: .init(maxItems: 100, expiration: .never))
@@ -20,7 +20,7 @@ When files are requested the `URLCache` will always check if the url has been re
 
 A more comprehensive practical usage example for fetching PDF files is shown below:
 
-```
+```swift
 struct PDFClient {
     private let cache: URLCache
 
