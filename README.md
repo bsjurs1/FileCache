@@ -1,43 +1,92 @@
-# URLCache 
+# URLCache
 
-URLCache is a simple and modern Swift based tool to make it easy to fetch and cache data using the `async`/`await` pattern on Apple platforms.
+Disk-backed caching for async/await-powered network fetches on Apple platforms. `URLCache` wraps `URLSession` to transparently persist responses, enforce eviction policies, and keep your code focused on data processing instead of cache management.
 
-A simple example of how to use it looks like this:
+## Features
+- Async `fetch(_:)` that returns cached data instantly when available and refreshes transparently when needed
+- Pluggable eviction policy via `URLCachePolicy` with size (`maxItems`) and expiration controls (`.never`, `.timeInterval`, `.dateComponents`)
+- Automatic pruning of expired entries plus manual invalidation helpers (`removeCacheEntry`, `removeAll`)
+- Persistent on-disk storage under the app's Documents directory so caches survive app restarts
+- Safe defaults with the option to inject a custom `FileManager` for testing or advanced scenarios
 
+## Requirements
+- Swift 6.2 or newer (per `ToolsVersion` in `Package.swift`)
+- iOS 12, macOS 11, tvOS 12, or watchOS 4 minimum deployment targets
+
+## Installation
+Add `URLCache` to your project using Swift Package Manager.
+
+### Package.swift
+```swift
+// Inside dependencies
+.package(url: "https://github.com/bsjurs1/URLCache", branch: "main"),
+
+// Inside your target
+.target(
+    name: "MyFeature",
+    dependencies: [
+        .product(name: "URLCache", package: "URLCache")
+    ]
+)
+```
+
+### Xcode
+1. In Xcode, choose **File ▸ Add Packages…**
+2. Paste the repository URL (`https://github.com/bsjurs1/URLCache`)
+3. Pick the `main` branch (or a tagged release when available) and add the library to your targets
+
+## Quick Start
 ```swift
 import URLCache
 
 let cache = try URLCache(policy: .init(maxItems: 100, expiration: .never))
+let url = URL(string: "https://example.com/resource.pdf")!
 let data = try await cache.fetch(url)
 ```
+The first call fetches data from the network and stores it to disk. Subsequent calls return the cached bytes as long as the entry has not expired.
 
-The `URLCache` has a few public methods that you can use:
-
-* `fetch(_ url: URL)`: Fetch a file using the provided url.
-When files are requested the `URLCache` will always check if the url has been requested before, and return the stored object if it exists on disk.
-* `removeAll()`: Remove all entries from the cache
-* `removeCacheEntry(for url: URL)`: Removes cache entry for file fetched from the provided url
-
-A more comprehensive practical usage example for fetching PDF files is shown below:
+## Configuration
+`URLCachePolicy` controls how long entries are kept around:
 
 ```swift
-struct PDFClient {
-    private let cache: URLCache
-
-    init() throws {
-        self.cache = try URLCache(policy: .init(maxItems: 100, expiration: .never))
-    }
-    
-    func fetchPDF(url: URL) async throws -> PDFDocument {
-        let data = try await cache.fetch(url)
-        guard let document = PDFDocument(data: data) else {
-            throw URLError(.cannotDecodeContentData)
-        }
-        return document
-    }
-}
+let policy = URLCachePolicy(
+    maxItems: 50, // keep up to 50 unique URLs before evicting the oldest
+    expiration: .timeInterval(60 * 60 * 24) // expire a day after caching
+)
+let cache = try URLCache(policy: policy)
 ```
 
-You can easily add this package using SPM.
+Supported expiration options:
+- `.never`: entries stay until manually removed or evicted by `maxItems`
+- `.timeInterval(TimeInterval)`: expire a fixed number of seconds after creation
+- `.dateComponents(DateComponents)`: expire using calendar math (e.g. "after 1 month")
 
-Happy hacking!
+For more advanced setups, the initializer also accepts a custom `FileManager`, letting you direct storage to test-specific directories or shared containers.
+
+## Manual Cache Management
+```swift
+// Remove a single item (also deletes the file on disk)
+cache.removeCacheEntry(for: url)
+
+// Flush everything and recreate the cache directory
+try await cache.removeAll()
+```
+
+`fetch(_:)` throws standard `URLError`s when the network request fails. Initialization can throw `URLCacheError.unableToCreateDocumentsURL` if the cache directory cannot be created.
+
+## How It Works
+- Cached payloads are stored under `Documents/URLCache/` and tracked via a JSON index for quick lookups.
+- Each call to `fetch(_:)` checks the index first; valid entries are loaded directly from disk.
+- Expired entries are pruned lazily during fetches and at initialization.
+- When the cache exceeds `maxItems`, the oldest entry is evicted automatically before storing the new response.
+
+## Testing
+This package ships with a comprehensive suite powered by the Swift Testing library. Run them with:
+```bash
+swift test
+```
+
+The tests cover persistence, eviction, expiration, manual invalidation, and error handling to serve as both verification and usage examples.
+
+## License
+URLCache is available under the MIT license. See the [`LICENSE`](LICENSE) file for details.
