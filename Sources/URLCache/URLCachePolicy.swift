@@ -7,6 +7,6 @@
 import Foundation
 
 public struct URLCachePolicy {
-    let maxItems: Int
-    let expiration: URLCacheExpirationPolicy
+    public let maxItems: Int
+    public let expiration: URLCacheExpirationPolicy
 }

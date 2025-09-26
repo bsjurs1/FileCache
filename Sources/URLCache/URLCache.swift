@@ -24,7 +24,7 @@ public class URLCache {
     /// - Parameters:
     ///   - policy: tells the cache how long to retain data
     ///   - fileManager: provide the desired filemanager to use for the cache
-    init(
+    public init(
         policy: URLCachePolicy,
         fileManager: FileManager = .default
     ) throws {
