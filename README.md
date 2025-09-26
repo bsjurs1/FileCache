@@ -21,7 +21,7 @@ When files are requested the `URLCache` will always check if the url has been re
 A more comprehensive practical usage example for fetching PDF files is shown below:
 
 ```
-struct PDFDownloadClient {
+struct PDFClient {
     private let cache: URLCache
 
     init() throws {
@@ -38,4 +38,6 @@ struct PDFDownloadClient {
 }
 ```
 
-You can easily add this package using SPM. 
+You can easily add this package using SPM.
+
+Happy hacking!
