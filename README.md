@@ -1,5 +1,7 @@
 # FileCache
 
+![FileCache logo](Assets/logo.png)
+
 Disk-backed caching for async/await-powered network fetches on Apple platforms. `FileCache` wraps `URLSession` to transparently persist responses, enforce eviction policies, and keep your code focused on data processing instead of cache management.
 
 ## Features
