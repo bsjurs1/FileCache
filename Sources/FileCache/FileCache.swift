@@ -5,9 +5,11 @@
 //
 
 import Foundation
+import Observation
 
 /// A simple cache utility that will fetch files over the network and store them on disk based on the provided `FileCachePolicy`.
 /// When files are requested the `FileCache` will always check if the url has been requested before, and return the stored object.
+@Observable
 public class FileCache {
     private let policy: FileCachePolicy
     private let fileManager: FileManager
