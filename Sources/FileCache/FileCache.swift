@@ -106,7 +106,9 @@ public class FileCache {
         _ data: Data,
         for url: URL
     ) throws {
-        let filename = UUID().uuidString
+        let fileType = url.pathExtension
+        let uuidString = UUID().uuidString
+        let filename = [uuidString, fileType].joined(separator: ".")
         let fileURL = cacheDirectoryURL.appendingPathComponent(filename)
         try data.write(to: fileURL, options: [.atomic])
         let now = Date()
@@ -150,6 +152,13 @@ public class FileCache {
         removeOldestCacheEntryIfNeeded()
         try store(data, for: url)
         return data
+    }
+    
+    /// Get the local file url for a cached resource
+    /// - Parameters:
+    ///   - url: the universal resource locator pointing to a remote binary blob
+    public func getFileURLForCachedResource(at url: URL) -> URL? {
+        index[url]?.diskURL
     }
 
     private func removeOldestCacheEntryIfNeeded() {
