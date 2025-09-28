@@ -7,8 +7,8 @@
 import Foundation
 
 public struct FileCacheObject: Codable, Equatable {
-    let createdAt: Date
-    let diskURL: URL
+    public let createdAt: Date
+    public let diskURL: URL
 
     public init(createdAt: Date, diskURL: URL) {
         self.createdAt = createdAt

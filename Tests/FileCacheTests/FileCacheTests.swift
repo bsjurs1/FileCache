@@ -2,7 +2,6 @@ import Testing
 import Foundation
 @testable import FileCache
 
-@Suite("FileCache")
 struct FileCacheTests {
     @Test func initializationFailsWhenDocumentsDirectoryIsMissing() {
         let policy = FileCachePolicy(maxItems: 1, expiration: .never)

@@ -15,9 +15,6 @@ let package = Package(
             targets: ["FileCache"]
         ),
     ],
-    dependencies: [
-        .package(url: "https://github.com/apple/swift-testing", branch: "main")
-    ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
@@ -27,10 +24,7 @@ let package = Package(
         ),
         .testTarget(
             name: "FileCacheTests",
-            dependencies: [
-                "FileCache",
-                .product(name: "Testing", package: "swift-testing")
-            ],
+            dependencies: ["FileCache"],
             path: "Tests/FileCacheTests"
         ),
     ]
