@@ -139,6 +139,7 @@ public class FileCache {
     /// When files are requested the `FileCache` will always check if the url has been requested before, and return the stored object if it exists on disk.
     /// - Parameters:
     ///   - url: the universal resource locator pointing to a binary blob to fetch
+    @discardableResult
     public func fetch(_ url: URL) async throws -> Data {
         if let cacheObject = index[url] {
             if isExpired(cacheObject) {
