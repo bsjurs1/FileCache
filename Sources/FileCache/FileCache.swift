@@ -157,6 +157,16 @@ public class FileCache: FileCaching {
         return data
     }
     
+    /// Manually insert data for the given URL into the cache.
+    /// - Parameters:
+    ///   - data: The binary payload to persist.
+    ///   - url: The remote resource identifier associated with the payload.
+    public func add(_ data: Data, for url: URL) throws {
+        removeCacheEntry(for: url)
+        removeOldestCacheEntryIfNeeded()
+        try store(data, for: url)
+    }
+    
     /// Get the local file url for a cached resource
     /// - Parameters:
     ///   - url: the universal resource locator pointing to a remote binary blob

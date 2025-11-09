@@ -61,6 +61,10 @@ public final class InMemoryFileCache: FileCaching {
             throw URLError(.resourceUnavailable)
         }
     }
+    
+    public func add(_ data: Data, for url: URL) throws {
+        storage[url] = data
+    }
 
     /// Purely in-memory: returns `nil` because no file URL exists.
     public func getFileURLForCachedResource(at url: URL) -> URL? {
