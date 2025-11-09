@@ -104,7 +104,20 @@ public class FileCache: FileCaching {
         index.removeValue(forKey: url)
     }
 
-    private func store(
+    public func store(
+        _ data: Data,
+        for url: URL
+    ) throws {
+        if let existingEntry = index[url] {
+            deleteCacheFile(at: existingEntry.diskURL)
+            index.removeValue(forKey: url)
+        } else {
+            removeOldestCacheEntryIfNeeded()
+        }
+        try writeToDisk(data, for: url)
+    }
+
+    private func writeToDisk(
         _ data: Data,
         for url: URL
     ) throws {
@@ -152,7 +165,6 @@ public class FileCache: FileCaching {
         }
         
         let (data, _) = try await URLSession.shared.data(from: url)
-        removeOldestCacheEntryIfNeeded()
         try store(data, for: url)
         return data
     }
@@ -162,8 +174,6 @@ public class FileCache: FileCaching {
     ///   - data: The binary payload to persist.
     ///   - url: The remote resource identifier associated with the payload.
     public func add(_ data: Data, for url: URL) throws {
-        removeCacheEntry(for: url)
-        removeOldestCacheEntryIfNeeded()
         try store(data, for: url)
     }
     
@@ -175,7 +185,7 @@ public class FileCache: FileCaching {
     }
 
     private func removeOldestCacheEntryIfNeeded() {
-        if policy.maxItems < index.count {
+        if policy.maxItems <= index.count {
             removeOldestCacheEntry()
         }
     }

@@ -79,6 +79,63 @@ struct FileCacheTests {
         #expect(second == secondPayload)
         #expect(MockURLProtocol.requestCount(for: url) == 2)
     }
+    
+    @Test func storePersistsDataWithoutNetworkRoundtrip() async throws {
+        let fileManager = TemporaryFileManager()
+        defer { fileManager.cleanup() }
+        prepareMockURLProtocol()
+        let cache = try FileCache(
+            policy: .init(maxItems: 10, expiration: .never),
+            fileManager: fileManager
+        )
+        let url = URL(string: "https://example.com/manual-store")!
+        let payload = Data("manual-store".utf8)
+        try cache.store(payload, for: url)
+        let cached = try await cache.fetch(url)
+        #expect(cached == payload)
+        #expect(MockURLProtocol.requestCount(for: url) == 0)
+        #expect(cache.getFileURLForCachedResource(at: url) != nil)
+    }
+    
+    @Test func storeHonorsPolicyLimits() async throws {
+        let fileManager = TemporaryFileManager()
+        defer { fileManager.cleanup() }
+        prepareMockURLProtocol()
+        let cache = try FileCache(
+            policy: .init(maxItems: 1, expiration: .never),
+            fileManager: fileManager
+        )
+        let firstURL = URL(string: "https://example.com/first-store")!
+        let secondURL = URL(string: "https://example.com/second-store")!
+        try cache.store(Data("first".utf8), for: firstURL)
+        try cache.store(Data("second".utf8), for: secondURL)
+        #expect(cache.getFileURLForCachedResource(at: firstURL) == nil)
+        let cached = try await cache.fetch(secondURL)
+        #expect(cached == Data("second".utf8))
+    }
+    
+    @Test func storeReplacesExistingEntry() async throws {
+        let fileManager = TemporaryFileManager()
+        defer { fileManager.cleanup() }
+        prepareMockURLProtocol()
+        let cache = try FileCache(
+            policy: .init(maxItems: 2, expiration: .never),
+            fileManager: fileManager
+        )
+        let url = URL(string: "https://example.com/replaced")!
+        try cache.store(Data("first".utf8), for: url)
+        let firstLocation = cache.getFileURLForCachedResource(at: url)
+        #expect(firstLocation != nil)
+        try cache.store(Data("second".utf8), for: url)
+        let secondLocation = cache.getFileURLForCachedResource(at: url)
+        #expect(secondLocation != nil)
+        #expect(secondLocation != firstLocation)
+        if let firstLocation {
+            #expect(!FileManager.default.fileExists(atPath: firstLocation.path))
+        }
+        let cached = try await cache.fetch(url)
+        #expect(cached == Data("second".utf8))
+    }
 
     @Test func removeCacheEntryDeletesDiskArtifacts() async throws {
         let fileManager = TemporaryFileManager()

@@ -63,7 +63,7 @@ public final class InMemoryFileCache: FileCaching {
     }
     
     public func add(_ data: Data, for url: URL) throws {
-        storage[url] = data
+        try store(data, for: url)
     }
 
     /// Purely in-memory: returns `nil` because no file URL exists.
@@ -80,5 +80,9 @@ public final class InMemoryFileCache: FileCaching {
     public func removeAll() async throws {
         storage.removeAll()
         behaviors.removeAll()
+    }
+    
+    public func store(_ data: Data, for url: URL) throws {
+        storage[url] = data
     }
 }

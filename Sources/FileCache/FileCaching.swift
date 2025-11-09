@@ -11,6 +11,7 @@ import Foundation
 public protocol FileCaching: AnyObject, Observable {
     @discardableResult
     func fetch(_ url: URL) async throws -> Data
+    func store(_ data: Data, for url: URL) throws
     func add(_ data: Data, for url: URL) throws
     func getFileURLForCachedResource(at url: URL) -> URL?
     func removeCacheEntry(for url: URL)
